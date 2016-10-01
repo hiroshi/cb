@@ -1,3 +1,7 @@
+build:
+	go build -o cb main.go
+
+# examples
 run-example: examples/node-docker-example.tar.gz
 	go run main.go $^ --config examples/cb-demo.json
 
