@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	// "bytes"
 	"encoding/json"
 	"flag"
@@ -27,6 +28,7 @@ func DockerOutput(arg ...string) (string, error) {
 	log.Println(cmd.Args)
 	out, err := cmd.Output()
 	if err != nil {
+		log.Print(err)
 		return "", err
 	}
 	return strings.TrimSpace(string(out[:])), nil
@@ -55,102 +57,45 @@ func cbMain() (exitCode int) {
 		return 1
 	}
 
-	// ##  Expand source to workspace
-	// create workspace
-	// NOTE: On macOS default prefix start with "/var/folders/", but default File sharing option of Docker for Mac don't allow to mount /var, but /tmp
-	// workspace, err := ioutil.TempDir("/tmp", "cb_workspace")
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// defer func() {
-	// 	log.Println("cleanup:", workspace)
-	// 	if err := os.RemoveAll(workspace); err != nil {
-	// 		log.Print(err)
-	// 	}
-	// }()
-	// log.Println("workspace:", workspace)
-	// // get abs path to source
-	// sourcePath, err := filepath.Abs(source)
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// // cd workspace
-	// if err:= os.Chdir(workspace); err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// // expand source
-	// cmd := exec.Command("tar", "xzvf", sourcePath)
-	// log.Println(cmd.Args)
-	// out, err := cmd.CombinedOutput()
-	// log.Printf("%s", out)
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-
 	// Create workspace volume
 	workspace, err := DockerOutput("volume", "create")
 	if err != nil {
-		log.Print(err)
 		return 1
 	}
 	log.Println("workspace:", workspace)
-	defer func() {
-		_, err := DockerOutput("volume", "rm", workspace)
-		if err != nil {
-			log.Print(err)
-		}
-	}()
+	defer DockerOutput("volume", "rm", workspace)
 	// Create a container to be destination of `docker cp`
-	cmd := exec.Command("docker", "create", "--volume", workspace + ":/workspace", "busybox")
-	log.Println(cmd.Args)
-
-	out, err := cmd.Output()
+	container, err := DockerOutput("create", "--volume", workspace + ":/workspace", "busybox")
+	if err != nil {
+		return 1
+	}
+	log.Println("container:", container)
+	defer DockerOutput("rm", container)
+	// open source tar stream
+	sourceReader, err := os.Open(source)
 	if err != nil {
 		log.Print(err)
 		return 1
 	}
-	// lines := bytes.Split(out, []byte("\n"))
-	// log.Println(lines)
-	// log.Println(string(out))
-	log.Println(strings.Split(string(out), "\n"))
-
-	
-	// buf := bytes.NewBuffer(out)
-
-	// stdout, err := cmd.StdoutPipe()
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// if err := cmd.Start(); err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// scanner := bufio.NewScanner(stdout)
-	// ch := make(chan string)
-	// go func() {
-	// 	for scanner.Scan() {}
-	// 	ch <- scanner.Text()
-	// }()
-	// if err := scanner.Err(); err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// container := <- ch
-	// log.Println("container:", container)
-
-	// out, err := cmd.Output()
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return 1
-	// }
-	// buf := bytes.NewBuffer(out)
-
-	return 1
+	defer sourceReader.Close()
+	tarReader, err := gzip.NewReader(sourceReader)
+	if err != nil {
+		log.Print(err)
+		return 1
+	}
+	defer tarReader.Close()
+	// Expand source to workspace volume through container
+	cmd := exec.Command("docker", "cp", "-", container + ":/workspace")
+	log.Println(cmd.Args)
+	cmd.Stdin = tarReader
+	if err := cmd.Start(); err != nil {
+		log.Print(err)
+		return 1
+	}
+	if err := cmd.Wait(); err != nil {
+		log.Print(err)
+		return 1
+	}
 
 	var config Config
 	err = json.Unmarshal(b, &config)
