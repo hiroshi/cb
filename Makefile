@@ -1,9 +1,18 @@
+export GOPATH ?= $(HOME)/go
+GOPATH_CB = $(GOPATH)/src/github.com/hiroshi/cb
+SRCS = ../main.go
+
 build:
 	go build -o cb main.go
 
-# examples
-run-example: examples/node-docker-example.tar.gz
-	go run main.go $^ --config examples/cb-demo.json
+goget: symlink
+	(cd $(GOPATH_CB) && go get -v)
 
-examples/node-docker-example.tar.gz:
-	cd examples && curl -O https://storage.googleapis.com/container-builder-examples/node-docker-example.tar.gz
+symlink: | $(dir $(GOPATH_CB))
+	ln -snf $(shell pwd) $(GOPATH_CB)
+
+$(dir $(GOPATH_CB)):
+	mkdir -p $@
+
+run-example:
+	cd examples && make

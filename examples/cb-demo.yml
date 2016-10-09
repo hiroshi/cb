@@ -1,0 +1,9 @@
+steps:
+- name: gcr.io/cloud-builders/docker
+  args:
+  - "build"
+  - "-t"
+  - "gcr.io/my-project/cb-demo-img"
+  - "."
+images:
+- gcr.io/my-project/cb-demo-img

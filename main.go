@@ -4,23 +4,59 @@ import (
 	"compress/gzip"
 	// "bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	// "fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	// "path/filepath"
+	"path/filepath"
 	"strings"
 )
 
 type Step struct {
-	ImageName string `json:"name"`
+	ImageName string `json:"name" yaml:"name"`
 	Args []string
 }
 
 type Config struct {
 	Steps []Step
+}
+
+func ReadConfig(path string) (Config, error) {
+	var config Config
+	file, err := os.Open(path)
+	if err != nil {
+		log.Print(err)
+		return config, err
+	}
+	defer file.Close()
+	var b []byte
+	b, err = ioutil.ReadAll(file)
+	if err != nil {
+		log.Print(err)
+		return config, err
+	}
+	ext := filepath.Ext(path)
+	switch ext {
+	case ".json":
+		if err = json.Unmarshal(b, &config); err != nil {
+			log.Print("JSON Error:", err)
+			return config, err
+		}
+	case ".yaml", ".yml":
+		if err = yaml.Unmarshal(b, &config); err != nil {
+			log.Print("YAML Error:", err)
+			return config, err
+		}
+	default:
+		err := errors.New("Unknown config extension: " + ext)
+		log.Print(err)
+		return config, err
+	}
+	return config, nil
 }
 
 func DockerOutput(arg ...string) (string, error) {
@@ -44,16 +80,8 @@ func cbMain() (exitCode int) {
 	flags.Parse(os.Args[2:])
 
 	// Read the config file
-	file, err := os.Open(*configPath)
+	config, err := ReadConfig(*configPath)
 	if err != nil {
-		log.Print(err)
-		return 1
-	}
-	defer file.Close()
-	var b []byte
-	b, err = ioutil.ReadAll(file)
-	if err != nil {
-		log.Print(err)
 		return 1
 	}
 
@@ -97,8 +125,6 @@ func cbMain() (exitCode int) {
 		return 1
 	}
 
-	var config Config
-	err = json.Unmarshal(b, &config)
 	for _, step := range config.Steps {
 		args := append([]string{
 			"run",
