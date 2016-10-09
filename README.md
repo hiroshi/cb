@@ -1,4 +1,4 @@
-# cb - Container Builder
+# cb - a Container Builder
 
 It builds container images locally using Google Cloud Container Builder config file.
 
