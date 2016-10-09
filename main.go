@@ -52,7 +52,7 @@ func ReadConfig(path string) (Config, error) {
 			return config, err
 		}
 	default:
-		err := errors.New("Unknown config extension: " + ext)
+		err := errors.New("Unknown configuration file extension: " + ext)
 		log.Print(err)
 		return config, err
 	}
@@ -76,7 +76,7 @@ func cbMain() (exitCode int) {
 	source := os.Args[1]
 	log.Println("source:", source)
 	flags := flag.NewFlagSet("", flag.ExitOnError)
-	configPath := flags.String("config", "", "The .yaml or .json file to use for build configuration.")
+	configPath := flags.String("configuration", "", "The .yaml or .json file to use for build configuration.")
 	flags.Parse(os.Args[2:])
 
 	// Read the config file
