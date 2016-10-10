@@ -19,6 +19,7 @@ import (
 type Step struct {
 	ImageName string `json:"name" yaml:"name"`
 	Args []string
+	Env map[string]string
 }
 
 type Config struct {
@@ -126,17 +127,19 @@ func cbMain() (exitCode int) {
 	}
 
 	for _, step := range config.Steps {
-		args := append([]string{
+		args := []string{
 			"run",
 			"--rm",
 			"--volume", "/var/run/docker.sock:/var/run/docker.sock",
 			// --volume /root/.docker:/root/.docker
 			"--volume", workspace + ":/workspace",
 			"--workdir", "/workspace",
-			// --env <KEY1=val1>
-			// --env <KEY2=val2>
-			step.ImageName},
-			step.Args...)
+		}
+		for key, value := range step.Env {
+			args = append(args, "--env", key + "=" + value)
+		}
+		args = append(args, step.ImageName)
+		args = append(args, step.Args...)
 		cmd := exec.Command("docker", args...)
 		log.Println(cmd.Args)
 		cmd.Stdout = os.Stdout
