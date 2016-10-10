@@ -5,10 +5,10 @@ SRCS = ../main.go
 all: json-config yaml-config
 
 json-config: node-docker-example.tar.gz symlink
-	cd $(GOPATH_CB)/examples && go run $(SRCS) $< --configuration cb-demo.json
+	cd $(GOPATH_CB)/examples && go run $(SRCS) $< --config cb-demo.json
 
 yaml-config: node-docker-example.tar.gz symlink
-	cd $(GOPATH_CB)/examples && go run $(SRCS) $< --configuration cb-demo.yml
+	cd $(GOPATH_CB)/examples && go run $(SRCS) $< --config cb-demo.yml
 
 node-docker-example.tar.gz:
 	cd examples && curl -O https://storage.googleapis.com/container-builder-examples/$@
