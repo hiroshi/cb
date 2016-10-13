@@ -20,6 +20,7 @@ type Step struct {
 	ImageName string `json:"name" yaml:"name"`
 	Args []string
 	Env map[string]string
+	Dir string
 }
 
 type Config struct {
@@ -127,13 +128,17 @@ func cbMain() (exitCode int) {
 	}
 
 	for _, step := range config.Steps {
+		dir := "/workspace"
+		if step.Dir != "" {
+			dir += "/" + step.Dir
+		}
 		args := []string{
 			"run",
 			"--rm",
 			"--volume", "/var/run/docker.sock:/var/run/docker.sock",
 			// --volume /root/.docker:/root/.docker
 			"--volume", workspace + ":/workspace",
-			"--workdir", "/workspace",
+			"--workdir", dir,
 		}
 		for key, value := range step.Env {
 			args = append(args, "--env", key + "=" + value)
