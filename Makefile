@@ -20,3 +20,10 @@ $(dir $(GOPATH_CB)):
 
 run-example:
 	cd examples && make
+
+# build single binary cb image
+cb-build: source.tar.gz
+	cd $(GOPATH_CB) && go run main.go $< --config config.yml
+
+source.tar.gz: main.go build.sh Dockerfile
+	tar czvf $@ $^
