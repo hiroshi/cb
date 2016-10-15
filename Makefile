@@ -25,5 +25,5 @@ run-example:
 cb-build: source.tar.gz
 	cd $(GOPATH_CB) && go run main.go $< --config config.yml
 
-source.tar.gz: main.go build.sh Dockerfile
+source.tar.gz: main.go Dockerfile Dockerfile.build
 	tar czvf $@ $^

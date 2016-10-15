@@ -1,23 +1,9 @@
 steps:
-- name: golang
-  args: ["./build.sh"]
+- name: gcr.io/cloud-builders/docker
+  args: ["build", "-t", "cb-build", "-f", "Dockerfile.build", "."]
+- name: cb-build
+  args: ["cp", "/go/src/cb/cb", "/workspace"]
 - name: gcr.io/cloud-builders/docker
   args: ["build", "-t", "hiroshi3110/cb", "."]
-
-# - name: gcr.io/cloud-builders/docker
-#   args: ["build", "-f", "Dockerfile.build", "."]
-# - name: gcr.io/cloud-builders/docker
-#   args: ["build", "-t", "hiroshi3110/cb"]
-# - name: busybox
-#   args: ["mkdir", "-p", "/workspace/src/cb"]
-# - name: golang
-#   args: ["go", "get", "-v"]
-#   env:
-#     GOPATH: "/workspace"
-#   dir: "src/cb"
-# - name: golang
-#   args: ["go", "build", "-v", "-o", "cb"]
-#   env:
-#     GOPATH: "/workspace"
 images:
 - hiroshi3110/cb
