@@ -35,7 +35,7 @@ Do you get it? No? See and run examples, I hope it may help you understand.
 
 ## TODO
 
-- Support `env`, `wait_for`, `id`, `dir` of [`steps`](https://cloud.google.com/container-builder/docs/api/build-requests#build_steps)
+- Support `wait_for` and `id` fields of [`steps`](https://cloud.google.com/container-builder/docs/api/build-requests#build_steps)
 
 ## References
 - [Build request - Google Cloud Container Builder](https://cloud.google.com/container-builder/docs/api/build-requests)
