@@ -127,7 +127,8 @@ func cbMain() (exitCode int) {
 		return 1
 	}
 
-	for _, step := range config.Steps {
+	for i, step := range config.Steps {
+		log.Println("Step:", i)
 		dir := "/workspace"
 		if step.Dir != "" {
 			dir += "/" + step.Dir
