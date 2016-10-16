@@ -24,13 +24,12 @@ This is an example config file. It will build a golang single binary image of `c
 - 3rd step - Build a final image from scratch. Just add the `cb` command from workplace volume.
 
 ```
-➜  Downloads docker images
-REPOSITORY                         TAG                       IMAGE ID            CREATED             SIZE
-cb                                 latest                    05994f135ea4        2 days ago          3.208 MB
-cb-build                           latest                    61f9b946f604        2 days ago          680.9 MB
+$ docker images
+REPOSITORY      TAG          IMAGE ID            CREATED             SIZE
+cb              latest       05994f135ea4        2 days ago          3.208 MB
+cb-build        latest       61f9b946f604        2 days ago          680.9 MB
 ...
 ```
-
 
 ## Install
 
