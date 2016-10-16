@@ -4,6 +4,4 @@ steps:
 - name: cb-build
   args: ["cp", "/go/src/cb/cb", "/workspace"]
 - name: gcr.io/cloud-builders/docker
-  args: ["build", "-t", "hiroshi3110/cb", "."]
-images:
-- hiroshi3110/cb
+  args: ["build", "-t", "cb", "."]

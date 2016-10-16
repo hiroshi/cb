@@ -2,10 +2,35 @@
 
 It builds container images locally using [Google Cloud Container Builder config file](https://cloud.google.com/container-builder/docs/api/build-requests#build_steps).
 
-Why just do `docker build`? It is useful to provide an easy way to manage multiple steps builds.
-(e.g.
-- Don't want to contain go command and depencendies just for a single go binary docker image.
-- Want to transpile frontent js files into a bundle then add it to a docker image.
+Why not just do `docker build`? It will be useful to provide an easy way to manage multiple steps builds.
+- We love small docker images:
+  - Don't want to contain golang environment. We love a single go binary docker image.
+  - Don't Want to contain frontend js build environment for a web app.
+
+### What it looks like?
+
+```
+steps:
+- name: gcr.io/cloud-builders/docker
+  args: ["build", "-t", "cb-build", "-f", "Dockerfile.build", "."]
+- name: cb-build
+  args: ["cp", "/go/src/cb/cb", "/workspace"]
+- name: gcr.io/cloud-builders/docker
+  args: ["build", "-t", "cb", "."]
+```
+This is an example config file. It will build a golang single binary image of `cb` command itself (not useful though).
+- 1st step - Build a temporary image. It builds a go binary using `golang` base image as usual.
+- 2nd step - Run the resulted image of 1st step. It copies the golang binary in the image to workspace volume.
+- 3rd step - Build a final image from scratch. Just add the `cb` command from workplace volume.
+
+```
+➜  Downloads docker images
+REPOSITORY                         TAG                       IMAGE ID            CREATED             SIZE
+cb                                 latest                    05994f135ea4        2 days ago          3.208 MB
+cb-build                           latest                    61f9b946f604        2 days ago          680.9 MB
+...
+```
+
 
 ## Install
 
@@ -19,7 +44,7 @@ Make sure you have `$GOPATH/bin` in your `$PATH`.
 
 ### Notes
 - The [`source`](https://cloud.google.com/container-builder/docs/api/build-requests#source_location) field in config will be ignored as well as `gcloud alpha container builds create` do. Specify SOURCE as 1st argument.
-- The ['images'](https://cloud.google.com/container-builder/docs/api/build-requests#resulting_images) field in config will be ignored. The `cb` command is intended for local builds so always pushing images are not supposed to be welcome.
+- The [`images`](https://cloud.google.com/container-builder/docs/api/build-requests#resulting_images) field in config will be ignored. The `cb` command is intended for local builds so always pushing images are not supposed to be welcome.
 
 ## How it works
 - 1) Create a volume for `workspace` with `docker volume create`.
