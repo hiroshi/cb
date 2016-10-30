@@ -163,5 +163,6 @@ func cbMain() (exitCode int) {
 }
 
 func main() {
+	// NOTE: Workaround for os.Exit() skips defer.
 	os.Exit(cbMain())
 }
