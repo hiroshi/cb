@@ -2,7 +2,7 @@ export GOPATH ?= $(HOME)/go
 GOPATH_CB = $(GOPATH)/src/github.com/hiroshi/cb
 SRCS = ../main.go
 
-OSARCH = $(or $(subst _, ,$(OS_ARCH)),$(subst /, ,,$(lastword $(shell go version))))
+OSARCH = $(or $(subst _, ,$(OS_ARCH)),$(subst /, ,$(lastword $(shell go version))))
 GOOS ?= $(firstword $(OSARCH))
 GOARCH ?= $(lastword $(OSARCH))
 CB = bin/$(GOOS)_$(GOARCH)/cb
