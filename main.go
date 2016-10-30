@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	// "fmt"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -75,10 +75,15 @@ func DockerOutput(arg ...string) (string, error) {
 func cbMain() (exitCode int) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// Take arguments and options
-	source := os.Args[1]
-	log.Println("source:", source)
 	flags := flag.NewFlagSet("", flag.ExitOnError)
 	configPath := flags.String("config", "", "The .yaml or .json file to use for build configuration.")
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Usage: %s SOURCE -config CONFIG.(yml|json)\n", os.Args[0])
+		flags.PrintDefaults()
+		return 1
+	}
+	source := os.Args[1]
+	log.Println("source:", source)
 	flags.Parse(os.Args[2:])
 
 	// Read the config file
